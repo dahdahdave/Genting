@@ -1,0 +1,24 @@
+{
+  "name": "Genting Family Trip",
+  "short_name": "Genting Trip",
+  "description": "Offline family itinerary for Genting Highlands, 28 Sep\u20131 Oct 2026.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f5",
+  "theme_color": "#1f6f5f",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
