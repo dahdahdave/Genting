@@ -1,22 +1,47 @@
 Genting Family Trip PWA
+https://dahdahdave.github.io/Genting/
 
-FILES
-- index.html
-- manifest.webmanifest
-- sw.js
-- icons/
+USING THE PLANNER
+- Every stop has Swap plan, Edit, move up/down and Move to day controls.
+- Drag the dotted handle with touch, mouse or pen. Hold over a day tab to
+  reveal that day; drop on the tab to append, or on a stop to reorder.
+- Times move with their stops and do not recalculate. Edit times after moving.
+- Swap with an activity, food venue, shop or spa, or write a custom plan.
+- Use in itinerary in the directory lets you choose which stop to replace.
+- Undo reverses the last 30 changes in the current session.
+- Restore this stop restores its original content; Restore original itinerary
+  restores all four days. The checklist remains separate.
 
-QUICK HOSTING WITH GITHUB PAGES
-1. Create a new GitHub repository, e.g. genting-trip.
-2. Upload every file/folder from this package to the repository root.
-3. Open repository Settings > Pages.
-4. Under Build and deployment, choose Deploy from a branch.
-5. Select main and / (root), then Save.
-6. Open the generated https://USERNAME.github.io/genting-trip/ address on your iPhone.
-7. In Safari: Share > Add to Home Screen > turn on Open as Web App > Add.
-8. Open the new Home Screen icon once while online so the service worker can cache the app.
-9. After that, the core itinerary should load offline.
+DIRECTORY
+Snapshot checked on 28 September 2026 using the official SkyAvenue,
+First World, Genting Grand, Awana SkyCentral and Premium Outlets directories,
+plus selected Gohtong Jaya listings. Every venue has a source link.
+Retail branches at different locations are separate entries. Known conflicting
+names are flagged. Coming-soon outlets are excluded. Cuisine tags aid browsing;
+they are not dietary certifications. Opening hours are not live. Independent
+businesses outside these directories are not exhaustively covered.
 
-IMPORTANT
-GitHub Pages project sites are publicly accessible. Do not add passports, booking numbers,
-phone numbers, addresses or other sensitive travel information to this repository.
+OFFLINE AND STORAGE
+Open online until Ready offline appears. The itinerary, filters, venue snapshot
+and checklist then work offline. External maps and sources require internet.
+Plans save locally on the device, not to GitHub. They do not sync between devices.
+Clearing site data removes saved plans. Original meal choices and checklist keys
+are migrated without changing the originals. Invalid prior plan data is retained
+until an explicit edit, when a recovery copy is made before writing new data.
+A storage failure displays a session-only notice.
+
+DEVELOPMENT
+Static HTML/CSS/JavaScript, no build step or runtime dependencies.
+Serve the repository over HTTP locally (for example python -m http.server).
+trip-data.js: original itinerary with stable stop IDs and legacy meal indexes.
+venues.js: directory snapshot, category/cuisine tags, locations and source URLs.
+app.js: rendering, edits, filtering, migration and pointer drag handling.
+styles.css: responsive layout. sw.js: versioned offline cache.
+Icons are in the repository root. Bump the cache name in sw.js for each release.
+GitHub Pages deploys main at the repository root.
+
+VALIDATION
+Browser checks cover legacy migration; any-stop alternatives and custom text;
+combined cuisine/location filters; directory-to-slot replacement; cross-day
+moves; touch and mouse dragging; cancellation and undo; persisted reload;
+offline reload and cached assets; invalid storage; mobile overflow; move buttons.
