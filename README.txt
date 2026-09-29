@@ -3,6 +3,12 @@ https://dahdahdave.github.io/Genting/
 
 USING THE PLANNER
 - Every stop has Swap plan, Edit, move up/down and Move to day controls.
+- Done toggles completion and saves on this device, including offline.
+  Replacing a stop or restoring its original plan clears its completion.
+- Explore Genting loads an interactive OpenStreetMap area overview on demand.
+  Pan and zoom or choose summit, Awana and Gohtong areas. Internet required;
+  this is not an indoor floor map. Venue Map links open Google Maps search.
+- Pao Xiang can be found under Bak Kut Teh or Bah Kut Teh.
 - Drag the dotted handle with touch, mouse or pen. Hold over a day tab to
   reveal that day; drop on the tab to append, or on a stop to reorder.
 - Times move with their stops and do not recalculate. Edit times after moving.

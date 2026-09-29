@@ -3295,7 +3295,8 @@ window.GENTING_VENUES = [
     "id": "venue-234"
   },
   {
-    "name": "PAO XIANG BAH KUT TEH",
+    "name": "Pao Xiang Bak Kut Teh",
+    "aliases": ["Pao Xiang Bah Kut Teh", "宝香绑线肉骨茶", "Awana Skyway Station", "Genting Highlands Premium Outlets", "GHPO"],
     "area": "Awana SkyCentral",
     "level": "Level 2",
     "lot": "2-9",

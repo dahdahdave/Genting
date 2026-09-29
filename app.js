@@ -62,13 +62,14 @@
   $('.tabs').addEventListener('click',e=>{const tab=e.target.closest('.tab');if(tab)showDay(tab.dataset.day);});
   function render(){
     $('#undo').disabled=!undoStack.length;
-    $('#itinerary').innerHTML=state.map((day,di)=>`<section id="${day.id}" class="day"><h2 class="section-title">${esc(defaults[di].title)}</h2><p class="section-note">${esc(defaults[di].note)}</p><div class="items" data-day="${day.id}">${day.items.length?day.items.map((it,i)=>`<article class="card" data-id="${it.id}"><div class="card-heading"><button class="drag-handle" aria-label="Drag ${esc(it.title)}. Use the move controls for keyboard reordering." title="Drag to reorder">⠿</button><div class="card-content"><div class="time">${esc(it.time)}</div><h3 class="plan-title">${esc(it.title)}</h3>${it.place?`<div class="place">${esc(it.place)}</div>`:''}${it.note?`<div class="note">${esc(it.note)}</div>`:''}</div></div><div class="card-actions"><button class="action primary" data-action="swap">Swap plan</button><button class="action" data-action="edit">Edit</button><button class="action" data-action="up" aria-label="Move ${esc(it.title)} up" ${i===0?'disabled':''}>↑</button><button class="action" data-action="down" aria-label="Move ${esc(it.title)} down" ${i===day.items.length-1?'disabled':''}>↓</button><select class="move-select" aria-label="Move ${esc(it.title)} to another day"><option value="">Move to day…</option>${defaults.map((d,j)=>`<option value="${d.id}" ${d.id===day.id?'disabled':''}>${labels[j]}</option>`).join('')}</select></div></article>`).join(''):'<p class="empty-day">No stops here. Drop a stop here or use “Move to day”.</p>'}</div></section>`).join('');
+    $('#itinerary').innerHTML=state.map((day,di)=>`<section id="${day.id}" class="day"><h2 class="section-title">${esc(defaults[di].title)}</h2><p class="section-note">${esc(defaults[di].note)}</p><p class="day-progress">${day.items.filter(it=>it.done).length} of ${day.items.length} stops done</p><div class="items" data-day="${day.id}">${day.items.length?day.items.map((it,i)=>`<article class="card${it.done?' is-done':''}" data-id="${it.id}"><div class="card-heading"><button class="drag-handle" aria-label="Drag ${esc(it.title)}. Use the move controls for keyboard reordering." title="Drag to reorder">⠿</button><div class="card-content"><div class="time">${esc(it.time)}</div><h3 class="plan-title">${esc(it.title)}</h3>${it.place?`<div class="place">${esc(it.place)}</div>`:''}${it.note?`<div class="note">${esc(it.note)}</div>`:''}</div></div><div class="card-actions"><button class="action done-button" data-action="done" aria-pressed="${!!it.done}" aria-label="${it.done?'Mark not done':'Mark done'}: ${esc(it.title)}">${it.done?'✓ Done · undo':'Done'}</button><button class="action primary" data-action="swap">Swap plan</button><button class="action" data-action="edit">Edit</button><button class="action" data-action="up" aria-label="Move ${esc(it.title)} up" ${i===0?'disabled':''}>↑</button><button class="action" data-action="down" aria-label="Move ${esc(it.title)} down" ${i===day.items.length-1?'disabled':''}>↓</button><select class="move-select" aria-label="Move ${esc(it.title)} to another day"><option value="">Move to day…</option>${defaults.map((d,j)=>`<option value="${d.id}" ${d.id===day.id?'disabled':''}>${labels[j]}</option>`).join('')}</select></div></article>`).join(''):'<p class="empty-day">No stops here. Drop a stop here or use “Move to day”.</p>'}</div></section>`).join('');
     showDay(activeDay);
   }
   $('#itinerary').addEventListener('click',e=>{
     const btn=e.target.closest('[data-action]'),card=e.target.closest('.card');if(!btn||!card)return;
     const id=card.dataset.id,l=locate(id);
     if(btn.dataset.action==='swap'||btn.dataset.action==='edit')openEditor(id,btn.dataset.action==='edit',btn);
+    else if(btn.dataset.action==='done'){change(()=>l.item.done=!l.item.done,l.item.done?'Stop marked not done':'Stop marked done');focusStop(id,'done');}
     else if(btn.dataset.action==='up'&&l.index>0){move(id,l.day.id,l.day.items[l.index-1].id);focusStop(id,'up');}
     else if(btn.dataset.action==='down'&&l.index<l.day.items.length-1){move(id,l.day.id,l.day.items[l.index+1].id,true);focusStop(id,'down');}
   });
@@ -87,7 +88,7 @@
     return ()=>Object.fromEntries([...container.querySelectorAll('[data-filter]')].map(el=>[el.dataset.filter,el.value]));
   }
   function unique(list){return [...new Set(list)].sort((a,b)=>a.localeCompare(b));}
-  function filtered(options,f){const terms=f.search.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);return options.filter(v=>(f.type==='all'||v.type===f.type)&&(f.cuisine==='all'||v.cuisines.includes(f.cuisine))&&(f.category==='all'||v.category===f.category)&&(f.area==='all'||v.area===f.area)&&(f.zone==='all'||v.zone===f.zone)&&terms.every(t=>[v.name,v.area,v.level,v.lot,v.category,v.zone,...v.cuisines].join(' ').toLocaleLowerCase().includes(t))).sort((a,b)=>a.name.localeCompare(b.name));}
+  function filtered(options,f){const terms=f.search.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);return options.filter(v=>(f.type==='all'||v.type===f.type)&&(f.cuisine==='all'||v.cuisines.includes(f.cuisine))&&(f.category==='all'||v.category===f.category)&&(f.area==='all'||v.area===f.area)&&(f.zone==='all'||v.zone===f.zone)&&terms.every(t=>[v.name,v.area,v.level,v.lot,v.category,v.zone,...v.cuisines,...(v.aliases||[])].join(' ').toLocaleLowerCase().includes(t))).sort((a,b)=>a.name.localeCompare(b.name));}
   function venueCard(v,swapping){const map='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(v.name+' '+v.area+' Genting Highlands');return `<article class="dir-item"><div class="dir-name">${esc(v.name)}</div><div class="dir-meta">${esc([v.area,v.level,v.lot?'Lot '+v.lot:''].filter(Boolean).join(' · '))}</div><div class="tags"><span class="dir-badge zone-badge">${esc(v.zone)}</span><span class="dir-badge">${esc(v.category)}</span>${v.cuisines.map(c=>`<span class="dir-badge">${esc(c)}</span>`).join('')}</div>${v.note?`<div class="dir-meta">${esc(v.note)}</div>`:''}${v.source?`<div class="venue-links"><a href="${esc(map)}" target="_blank" rel="noopener">Map ↗</a><a href="${esc(v.source)}" target="_blank" rel="noopener">Source ↗</a></div>`:''}<button class="action ${swapping?'primary':''}" data-venue="${v.id}">${swapping?'Use this plan':'Use in itinerary'}</button></article>`;}
   let dirLimit=24,swapLimit=24;
   const dirFilters=makeFilters($('#directory-filters'),'dir',()=>{dirLimit=24;renderDirectory();});
@@ -111,13 +112,41 @@
   dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();else if(editingId)focusStop(editingId,'swap');editingId=null;});
   $('#browse-tab').onclick=()=>editorPanel(false);$('#custom-tab').onclick=()=>editorPanel(true);
   $('#custom-form').onsubmit=e=>{e.preventDefault();const data=Object.fromEntries(['time','title','place','note'].map(k=>[k,$('#edit-'+k).value.trim()]));if(!data.title||!data.time)return;change(()=>Object.assign(locate(editingId).item,data),'Plan updated');closeEditor();};
-  $('#original-stop').onclick=()=>{const original=originals.find(it=>it.id===editingId);change(()=>Object.assign(locate(editingId).item,clone(original)),'Original stop restored');closeEditor();};
-  function applyVenue(id){const v=allOptions.find(v=>v.id===id);if(!v||!editingId)return;change(()=>{const it=locate(editingId).item;it.title=v.name;it.place=[v.area,v.level,v.lot?'Lot '+v.lot:''].filter(Boolean).join(' · ');it.note=[v.zone==='Summit'?'In the summit resort complex.':v.zone==='Mid-hill'?'Mid-hill: take the cable car or drive; allow travel time.':'Gohtong Jaya: drive required; allow travel time.',v.note||'',v.type==='restaurant'?'Confirm opening and a table for nine.':''].filter(Boolean).join(' ');},'Alternative saved. Check the time and travel needed.');closeEditor();}
+  $('#original-stop').onclick=()=>{const original=originals.find(it=>it.id===editingId);change(()=>Object.assign(locate(editingId).item,clone(original),{done:false}),'Original stop restored');closeEditor();};
+  function applyVenue(id){const v=allOptions.find(v=>v.id===id);if(!v||!editingId)return;change(()=>{const it=locate(editingId).item;it.done=false;it.title=v.name;it.place=[v.area,v.level,v.lot?'Lot '+v.lot:''].filter(Boolean).join(' · ');it.note=[v.zone==='Summit'?'In the summit resort complex.':v.zone==='Mid-hill'?'Mid-hill: take the cable car or drive; allow travel time.':'Gohtong Jaya: drive required; allow travel time.',v.note||'',v.type==='restaurant'?'Confirm opening and a table for nine.':''].filter(Boolean).join(' ');},'Alternative saved. Check the time and travel needed.');closeEditor();}
   $('#swap-list').onclick=e=>{const b=e.target.closest('[data-venue]');if(b)applyVenue(b.dataset.venue);};
   // Directory selection opens a clear slot chooser, so it never silently replaces a stop.
   $('#dir-list').onclick=e=>{const b=e.target.closest('[data-venue]');if(!b)return;const v=venues.find(v=>v.id===b.dataset.venue);returnFocus=b;editingId=null;$('#dialog-title').textContent='Choose a stop to replace';$('#dialog-context').textContent=v.name;$('#custom-form').classList.add('hidden');$('#browse-panel').classList.remove('hidden');$('.dialog-tabs').classList.add('hidden');$('#swap-filters').classList.add('hidden');$('#swap-count').textContent='The selected stop keeps its time.';$('#swap-more').hidden=true;$('#swap-list').innerHTML=state.map((d,i)=>`<div><h3>${labels[i]}</h3>${d.items.map(it=>`<button class="action slot-choice" data-slot="${it.id}" data-choice="${v.id}">${esc(it.time)} · ${esc(it.title)}</button>`).join('')}</div>`).join('');dialog.showModal();dialog.scrollTop=0;};
   $('#swap-list').addEventListener('click',e=>{const b=e.target.closest('[data-slot]');if(b){editingId=b.dataset.slot;applyVenue(b.dataset.choice);}});
   dialog.addEventListener('close',()=>{$('.dialog-tabs').classList.remove('hidden');$('#swap-filters').classList.remove('hidden');});
+
+  // Load the third-party interactive map only on request; never cache map tiles.
+  const mapAreas={
+    all:{bbox:'101.76,3.38,101.815,3.44',center:'14/3.410/101.788'},
+    summit:{bbox:'101.785,3.416,101.804,3.432',center:'16/3.424/101.795'},
+    awana:{bbox:'101.777,3.397,101.792,3.411',center:'16/3.404/101.785'},
+    gohtong:{bbox:'101.763,3.39,101.785,3.407',center:'15/3.398/101.774'}
+  };
+  let mapLoaded=false;
+  function updateMap(load=false){
+    const area=mapAreas[$('#map-area').value];
+    $('#map-full').href='https://www.openstreetmap.org/#map='+area.center;
+    if(!navigator.onLine){$('#map-status').textContent='You are offline. Reconnect to load the map; saved plans still work.';return;}
+    $('#map-status').textContent='Internet needed. Drag to pan; use + / − to zoom. If the map is blank, open the full map.';
+    if(load||mapLoaded){
+      mapLoaded=true;
+      const frame=document.createElement('iframe');
+      frame.title='Interactive Genting Highlands area map';
+      frame.src='https://www.openstreetmap.org/export/embed.html?bbox='+encodeURIComponent(area.bbox)+'&layer=mapnik';
+      $('#map-canvas').replaceChildren(frame);
+      $('#load-map').textContent='Reload map';
+    }
+  }
+  $('#load-map').onclick=()=>updateMap(true);
+  $('#map-area').onchange=()=>updateMap();
+  window.addEventListener('offline',()=>updateMap());
+  window.addEventListener('online',()=>updateMap());
+  updateMap();
 
   // Pointer events support touch, pen and mouse; only the handle captures scrolling.
   let drag=null,frame=0;

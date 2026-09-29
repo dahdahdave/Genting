@@ -1,4 +1,4 @@
-const CACHE = 'genting-trip-v2';
+const CACHE = 'genting-trip-v3';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./trip-data.js','./venues.js','./manifest.webmanifest','./icon-180.png','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
